@@ -8,6 +8,13 @@
       "when": 1761949537735,
       "tag": "0000_moaning_shard",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762087198006,
+      "tag": "0001_right_shotgun",
+      "breakpoints": true
     }
   ]
 }

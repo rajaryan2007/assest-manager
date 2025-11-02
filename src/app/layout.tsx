@@ -30,7 +30,9 @@ export default function RootLayout({
       >
         {" "}
         <Header />
-        {children}
+        
+          {children}
+        
       </body>
     </html>
   );

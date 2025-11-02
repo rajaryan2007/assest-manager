@@ -7,10 +7,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 import { Divide, Package } from "lucide-react";
-import Link from "next/link";
 
-function Loginpage() {
+import { headers } from "next/headers";
+import Link from "next/link";
+import {redirect }from "next/navigation";
+
+async function Loginpage() {
+   
+  const session = await auth.api.getSession({
+   headers:await headers()
+  }) 
+  if(session) redirect("/");
+
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50">
       <Card className="w-full max-w-md shadow">
