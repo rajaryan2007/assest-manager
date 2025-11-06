@@ -4,7 +4,7 @@ import { Plus,  Trash2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { Label } from "../ui/label"
 import { useState } from "react"
-import { addNewCategoryAction } from "@/actions/admin-actions"
+import { addNewCategoryAction, deleteCategoryAction } from "@/actions/admin-actions"
 import { TableBody,Table, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { category } from "@/lib/db/schema"
 import { log } from "console"
@@ -28,8 +28,15 @@ function CategoryManager({ categories: initialCategories }: CategoryManagerProps
 
     const [newCategoryName, setNewCategoryName] = useState('')
     
-    function handleDeleteCategory(){
-        console.log(category)
+    const handleDeleteCategory = async (currentCategoryIdToDelete:number)=>
+    {
+        const result = await deleteCategoryAction(currentCategoryIdToDelete);
+        
+        if(result.success){
+          setCategories(categorires.filter(c=>c.id !== currentCategoryIdToDelete))
+        }
+
+
     }
     const handleAddNewCategory = async (event: React.FormEvent) => {
         event.preventDefault()
@@ -103,7 +110,7 @@ function CategoryManager({ categories: initialCategories }: CategoryManagerProps
                   </TableCell>
                   <TableCell>
                     <Button
-                      onClick={() => handleDeleteCategory()}
+                      onClick={() => handleDeleteCategory(category.id)}
                       variant="ghost"
                       size={"icon"}
                     >

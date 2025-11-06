@@ -88,3 +88,31 @@ export async function getTotalUsersCountAction(){
         return 0
     }
 }
+
+export async function deleteCategoryAction(cateagoryId:number){
+    const session = await auth.api.getSession({
+        headers:await headers(),
+    });
+    if(!session?.user || session.user.role !== "admin"){
+        throw new Error("You must be an admin to delete this category");
+    }
+    
+    try {
+        await db.delete(category).where(eq(category.id,cateagoryId))
+        
+        revalidatePath("admin/setting")
+        return {
+            success:true,
+            message:"Category Delete successfully "
+        }
+
+
+    } catch (error) {
+        console.log(error)
+        return {
+            success:false,
+            message:"failed to delete cateagory"
+        }
+    }
+
+}

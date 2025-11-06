@@ -60,7 +60,7 @@ function Header() {
           {!isPending && user && !isAdminUser && (
             <>
               <Link
-                href="/dashboard/assets"
+                href="/dashboard/assests"
                 className="text-sm font-medium hover:text-teal-600"
               >
                 Assets
