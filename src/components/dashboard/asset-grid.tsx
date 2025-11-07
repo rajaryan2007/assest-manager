@@ -1,10 +1,28 @@
-"use client"
+
+
+type Asset = {
+  id: string;
+  title: string;
+  description: string | null;
+  fileUrl: string | null;
+  thumbnailUrl: string | null;
+  isApproved: string;
+  userId: string;
+  categoryId: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+
+interface AssetGridProps {
+    assets:Asset[];
+}
 
 
 
-function AssetsGrid(){
+function AssetsGrid({assets}:AssetGridProps){
     return <div>
-        AssetsGrid
+        
     </div>
 }
 

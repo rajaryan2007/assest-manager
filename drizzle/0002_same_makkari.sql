@@ -1,0 +1,1 @@
+ALTER TABLE "asset" ADD COLUMN "file_url" text;

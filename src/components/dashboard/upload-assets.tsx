@@ -3,7 +3,7 @@
 
 import { Plus, Upload } from "lucide-react";
 import { Button } from "../ui/button";
-import { DialogDescription,Dialog, DialogTitle, DialogTrigger, DialogContent, DialogHeader, DialogFooter } from "../ui/dialog";
+import { DialogDescription, Dialog, DialogTitle, DialogTrigger, DialogContent, DialogHeader, DialogFooter } from "../ui/dialog";
 import React, { useState } from "react";
 // import { DialogDescription } from "@radix-ui/react-dialog";
 import { Label } from "../ui/label";
@@ -12,6 +12,10 @@ import { Textarea } from "../ui/textarea";
 
 import { SelectValue, Select, SelectTrigger, SelectItem, SelectContent } from "../ui/select";
 import { Value } from "@radix-ui/react-select";
+import { log, time } from "console";
+import cluster from "cluster";
+import { rejects } from "assert";
+import { uploadAssestAction } from "@/actions/dashboard-action";
 
 
 type Category = {
@@ -31,6 +35,11 @@ type FormState = {
     file: File | null
 }
 
+type CloudinarySignature = {
+    signature: string,
+    timestamp: string,
+    apikey: string
+}
 
 
 function UploadAssets({ categories }: UploadDialogProps) {
@@ -44,29 +53,123 @@ function UploadAssets({ categories }: UploadDialogProps) {
         categoryId: "",
         file: null
     });
-    
-    const handleInputChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>{
-        const {name,value} = e.target
-        setFormState(prev=>({
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target
+        setFormState(prev => ({
             ...prev,
-            [name]:value
+            [name]: value
         }))
-    } 
-    
-    const handleFileChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if(file){
-            setFormState(prev=>({...prev,file}))
+        if (file) {
+            setFormState(prev => ({ ...prev, file }))
         }
     }
 
-    const handleCategoryChange =(value:string)=>{
+    const handleCategoryChange = (value: string) => {
         console.log(value)
-        setFormState((prev)=>({...prev,categoryId:value}));
+        setFormState((prev) => ({ ...prev, categoryId: value }));
     }
 
-    console.log(formState);
-    
+    async function getCloudinarySignature(): Promise<CloudinarySignature> {
+        const timestamp = Math.round(new Date().getTime() / 1000);
+
+        const response = await fetch('/api/cloudinary/signature', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ timestamp })
+        })
+        if (!response.ok) {
+            throw new Error("failed to created cloudinary singature ")
+        }
+        return response.json()
+
+    }
+
+
+    const handleAssestUplaod = async (event: React.FormEvent) => {
+        event.preventDefault()
+        setIsUploading(true)
+        setUploadProgressStatus(0)
+
+        try {
+            const { signature, apikey, timestamp } = await getCloudinarySignature();
+            console.log(signature, apikey, timestamp);
+
+            const cloudinaryData = new FormData();
+            cloudinaryData.append('file', formState.file as File);
+            cloudinaryData.append('api_key', apikey)
+            cloudinaryData.append('timestamp', timestamp.toString())
+            cloudinaryData.append('signature', signature);
+            cloudinaryData.append("folder", "next_full_assest_manager")
+
+            const xhr = new XMLHttpRequest()
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/auto/upload`)
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const progress = Math.round((event.loaded / event.total) * 100)
+                    setUploadProgressStatus(progress)
+                }
+            }
+
+            const cloudinaryPromise = new Promise<any>((resolve, reject) => {
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const response = JSON.parse(xhr.responseText)
+                        resolve(response)
+                    } else {
+                        reject(new Error("Uplaod to cloudinay"))
+                    }
+                }
+
+                xhr.onerror = () => { new Error("Upload to cloudinary failed") }
+            })
+            xhr.send(cloudinaryData)
+
+
+
+            const cloudinaryResponse = await cloudinaryPromise;
+
+            console.log(cloudinaryResponse, 'cloudinaryResponse');
+
+
+            const formData = new FormData()
+            formData.append('title', formState.title)
+            formData.append('description', formState.description)
+            formData.append("categoryId", formState.categoryId);
+            formData.append("fileUrl", cloudinaryResponse.secure_url);
+            formData.append("thumbnailUrl", cloudinaryResponse.secure_url)
+
+            //uplaod this assets to DB
+
+            const result = await uploadAssestAction(formData)
+
+            if (result.success) {
+                setOpen(false)
+                setFormState({
+                    title: "",
+                    description: "",
+                    categoryId: "",
+                    file: null
+                })
+            } else {
+                throw new Error(result?.error)
+            }
+
+        } catch (error) {
+            console.log("error", error)
+        } finally {
+            setIsUploading(false)
+            setUploadProgressStatus(0)
+        }
+
+    }
 
 
     return <Dialog open={open} onOpenChange={setOpen}>
@@ -81,7 +184,7 @@ function UploadAssets({ categories }: UploadDialogProps) {
                 <DialogTitle>Upload New Assets</DialogTitle>
                 <DialogDescription>Upload a new assests</DialogDescription>
             </DialogHeader>
-            <form className="space-y-5" >
+            <form onSubmit={handleAssestUplaod} className="space-y-5" >
                 <div className="space-y-2">
                     <Label htmlFor="title" >Title</Label>
                     <Input
@@ -106,7 +209,7 @@ function UploadAssets({ categories }: UploadDialogProps) {
                     <Label htmlFor="category" >
                         Category
                     </Label>
-                    <Select  onValueChange={handleCategoryChange} value={formState.categoryId} >
+                    <Select onValueChange={handleCategoryChange} value={formState.categoryId} >
                         <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
@@ -124,7 +227,7 @@ function UploadAssets({ categories }: UploadDialogProps) {
                         <Label htmlFor="file" >file</Label>
                         <Input type="file"
                             onChange={handleFileChange}
-                            
+
                             className="bg-grey-600 text-black-600"
                             id="file"
                             accept="image/"
@@ -133,7 +236,18 @@ function UploadAssets({ categories }: UploadDialogProps) {
 
                     </div>
                 </div>
-                <DialogFooter>
+                {
+                    isUploading && uploadProgressStatus > 0 && (
+                        <div className="mb-5 w-full bg-stone-100 rounded-full-h " >
+                            <div className="bg-teal-500 h-2 rounded-full " style={{width:`${uploadProgressStatus}`}} >
+                                <p className="text-xs text-slate-500 text-right" >
+                                    {uploadProgressStatus}% uplaod
+                                </p>
+                            </div>
+                        </div>
+                    )
+                }
+                <DialogFooter className="mt-6" >
                     <Button type="submit" >
                         <Upload className="mr-2 h-5 w-5" />
                         Upload the assests
