@@ -13,9 +13,10 @@ import {
 import { Users } from "lucide-react";
 
 async function SettingsPage() {
-  const [categories, userCount] = await Promise.all([
+  const [categories, userCount,assetsCount] = await Promise.all([
     getAllCategoriesAction(),
     getTotalUsersCountAction(),
+    getTotalUsersCountAction()
   ]);
 
   return (
@@ -40,7 +41,7 @@ async function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center text-lg font-medium">
               <Users className="mr-2 h-5 text-teal-500" />
-              Total assets
+              {assetsCount}
             </CardTitle>
             <CardDescription>
               All registration assets on the platform

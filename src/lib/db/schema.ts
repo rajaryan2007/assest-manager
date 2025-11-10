@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { real } from "drizzle-orm/gel-core";
 import { pgTable, text, timestamp, boolean, serial, uuid, integer } from "drizzle-orm/pg-core";
+import { Currency } from "lucide-react";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -95,6 +96,50 @@ export const asset = pgTable("asset",{
 
 
 //asset management tables
+
+export const payment = pgTable('payment',{
+  id:uuid("id").defaultRandom().primaryKey(),
+  amount:integer('amount').notNull(),
+  currency:text('currency').default("USD").notNull(),
+  status:text("status").notNull(),
+  provider:text('provider').notNull(),
+  providerId:text('provider_id'),
+  userId:text("user_id").notNull().references(()=>user.id),
+  createdAt:timestamp("created_at")
+    .$defaultFn(()=>new Date())
+    .notNull(),
+})
+
+export const purchase = pgTable('purchase',{
+  id:uuid('id').defaultRandom().primaryKey(),
+  assetId:uuid('asset_id').notNull().references(()=>asset.id,{onDelete:'restrict'}),
+  userId:text("user_id").notNull().references(()=>user.id ,{onDelete:'cascade'}),
+  paymentId:uuid('payment_id').notNull().references(()=> payment.id),
+  price:integer('price').notNull(),
+});
+
+export const invoice = pgTable('invoice',{
+  id:uuid('id').defaultRandom().primaryKey(),
+  invoiceNumber:text("invoice_number").notNull().unique(),
+  purchaseId:uuid('purchase_id').notNull().references(()=>purchase.id,{onDelete:'cascade'}),
+  userId:text("user_id")
+  .notNull()
+  .references(()=>user.id,{onDelete:'cascade'}),
+  amount:integer('amount').notNull(),
+  currency:text('currency').default("USD").notNull(),
+  status:text('status').notNull(),
+  htmlContent:text('html_content'),
+   createdAt:timestamp("created_at")
+    .$defaultFn(()=>new Date())
+    .notNull(),
+   updatedAt:timestamp("update_at")
+   .$defaultFn(()=>new Date())
+   .notNull()
+  
+})
+
+
+
 export const usersRelations = relations(user,({many})=>({
     sessions:many(session),
     accounts:many(account),
@@ -129,3 +174,5 @@ export const assetsRelations = relations(asset,({one,many})=>({
     references:[category.id]
   })
 }))
+
+

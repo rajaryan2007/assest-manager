@@ -20,10 +20,10 @@ async function UserAssetsPage() {
     
     return <div className="container py-6" >
         <div className="flex justify-between items-center mb-6" >
-            <h1 className="text-2xl font-bold text-gray-900"> Administrator</h1>
+            <h1 className="text-2xl font-bold text-gray-900"> Assest</h1>
             <UploadAssets categories={categories || []} />
         </div>
-        <AssetGrid />
+        <AssetGrid assets={assets} />
     </div>
 }
 export default UserAssetsPage;

@@ -121,14 +121,20 @@ function UploadAssets({ categories }: UploadDialogProps) {
             const cloudinaryPromise = new Promise<any>((resolve, reject) => {
                 xhr.onload = () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        const response = JSON.parse(xhr.responseText)
-                        resolve(response)
+                        try {
+                            const response = JSON.parse(xhr.responseText)
+                            resolve(response)
+                        } catch (e) {
+                            reject(new Error("Failed to parse Cloudinary response"))
+                        }
                     } else {
-                        reject(new Error("Uplaod to cloudinay"))
+                        reject(new Error(`Upload to Cloudinary failed with status ${xhr.status}`))
                     }
                 }
 
-                xhr.onerror = () => { new Error("Upload to cloudinary failed") }
+                xhr.onerror = () => {
+                    reject(new Error("Upload to Cloudinary failed due to network error"))
+                }
             })
             xhr.send(cloudinaryData)
 
@@ -239,7 +245,7 @@ function UploadAssets({ categories }: UploadDialogProps) {
                 {
                     isUploading && uploadProgressStatus > 0 && (
                         <div className="mb-5 w-full bg-stone-100 rounded-full-h " >
-                            <div className="bg-teal-500 h-2 rounded-full " style={{width:`${uploadProgressStatus}`}} >
+                            <div className="bg-teal-500 h-2 rounded-full " style={{ width: `${uploadProgressStatus}` }} >
                                 <p className="text-xs text-slate-500 text-right" >
                                     {uploadProgressStatus}% uplaod
                                 </p>
