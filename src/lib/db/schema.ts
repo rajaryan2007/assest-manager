@@ -172,7 +172,41 @@ export const assetsRelations = relations(asset,({one,many})=>({
   category:one(category,{
     fields:[asset.categoryId],
     references:[category.id]
+  }),
+  purchase:many(purchase)
+}));
+
+
+export const paymentRelation = relations(payment,({one,many})=>({
+   user:one(user,{
+    fields:[payment.userId],
+    references:[user.id]
+   }),
+   purchase:many(purchase)
+}))
+
+export const purchaseRelations = relations(purchase,({one})=>({
+  asset:one(asset,{
+    fields:[purchase.assetId],
+    references:[asset.id]
+  }),
+  user:one(user,{
+    fields:[purchase.assetId],
+    references:[user.id]
+  }),
+  payment:one(payment,{
+    fields:[purchase.paymentId],
+    references:[payment.id]
   })
 }))
 
-
+export const invoiceRelation =relations(invoice,({one})=>({
+  purchase:one(purchase,{
+    fields:[invoice.purchaseId],
+    references:[purchase.id]
+  }),
+  user:one(user,{
+    fields:[invoice.userId],
+    references:[user.id]
+  })
+}))
