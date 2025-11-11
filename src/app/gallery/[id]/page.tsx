@@ -45,8 +45,8 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
     const resolvedParams = await params;
 
     const result = await getAssetById(resolvedParams.id);
-    
-    
+
+
 
 
     if (!result) {
@@ -61,8 +61,8 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
         : "U";
 
 
-        const isAuthor = session?.user.id === userId;
-        
+    const isAuthor = session?.user.id === userId;
+
     return <div className="min-h-screen container px-4 bg-white" >
         <div className="container py-12" >
             <div className="grid gap-12 md:grid-cols-3" >
@@ -114,12 +114,12 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
                                         session?.user ?
                                             isAuthor ? (
                                                 <div className="bg-blue-50 text-blue-700 p-5 rounded-lg flex items-start gap-3" >
-                                                 <Info className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
-                                                     <p className="text-sm" >
+                                                    <Info className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
+                                                    <p className="text-sm" >
                                                         This is Your own assest. You can manage it from your asset dashborad.you can't Purchase ur own asset
-                                                        </p>                                  
-                                                </div>)  
-                                                : <div>Purchase allowed</div>
+                                                    </p>
+                                                </div>)
+                                                : <div>Purchase alloweded</div>
                                             : (<>
                                                 <Button asChild className="w-full bg-black text-white h-12">
                                                     <Link href="/login">Sign In to Purchase</Link>
