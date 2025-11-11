@@ -94,7 +94,7 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
                         </div>
                         <div>
                             <p className="text-sm font-medium" >{userName}</p>
-                            <p className="text-xs text-grey-500" >Creator</p>
+                            <p className="text-xs text-grey-500" >creator</p>
                         </div>
                     </div>
                 </div>
