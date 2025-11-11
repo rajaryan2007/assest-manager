@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { Badge, Divide, Info, Loader2, Tag } from "lucide-react"
+import { Badge, Divide, Download, Info, Loader2, ShoppingCart, Tag } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { Suspense } from "react"
@@ -62,6 +62,7 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
 
 
     const isAuthor = session?.user.id === userId;
+    const hasPurchasedAsset = true;
 
     return <div className="min-h-screen container px-4 bg-white" >
         <div className="container py-12" >
@@ -108,27 +109,40 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
                                     <span className="ml-2 text-gray-300">One Time purchase</span>
                                 </div>
                             </div>
-                            <CardContent className="p-6" >
-                                <div className="space-y-4" >
-                                    {
-                                        session?.user ?
-                                            isAuthor ? (
-                                                <div className="bg-blue-50 text-blue-700 p-5 rounded-lg flex items-start gap-3" >
-                                                    <Info className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
-                                                    <p className="text-sm" >
-                                                        This is Your own assest. You can manage it from your asset dashborad.you can't Purchase ur own asset
-                                                    </p>
-                                                </div>)
-                                                : <div>Purchase alloweded</div>
-                                            : (<>
-                                                <Button asChild className="w-full bg-black text-white h-12">
-                                                    <Link href="/login">Sign In to Purchase</Link>
+                            <CardContent className="p-6">
+                                <div className="space-y-4">
+                                    {session?.user ? (
+                                        isAuthor ? (
+                                            <div className="bg-blue-50 text-blue-700 p-5 rounded-lg flex items-start gap-3">
+                                                <Info className="w-5 h-5 text-blue-500 mt-1 flex-shrink-0" />
+                                                <p className="text-sm">
+                                                    This is your own asset. You can manage it from your asset dashboard.
+                                                    You can't purchase your own asset.
+                                                </p>
+                                            </div>
+                                        ) : hasPurchasedAsset ? (
+                                            <Button asChild className="w-full bg-green-600 text-white h-12">
+                                               <a download>
+                                                 <Download  className="mr-2 w-6 h-6 " />
+                                                 Download Asset
+                                               </a>
+                                            </Button>
+                                        ) : (
+                                            <form>
+                                                <Button type="submit" className="w-full bg-black text-white h-12">
+                                                    <ShoppingCart className="w-5 h-5 mr-2" />
+                                                    Purchase Now
                                                 </Button>
-
-                                            </>)
-                                    }
+                                            </form>
+                                        )
+                                    ) : (
+                                        <Button asChild className="w-full bg-black text-white h-12">
+                                            <Link href="/login">Sign in to Purchase</Link>
+                                        </Button>
+                                    )}
                                 </div>
                             </CardContent>
+
                         </Card>
                     </div>
 
