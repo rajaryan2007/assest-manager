@@ -15,7 +15,7 @@ async function AssetsApprovalPage() {
         <Card className="bg-white">
           <CardContent className="py-16 flex flex-col items-center justify-center">
             <p className="text-center text-slate-500 text-lg">
-              All Assets have been reviewed not file
+              All Assets have been reviewed the file 
             </p>
           </CardContent>
         </Card>
