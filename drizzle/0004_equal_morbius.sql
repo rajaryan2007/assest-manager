@@ -1,0 +1,1 @@
+ALTER TABLE "purchase" ADD COLUMN "created_at" timestamp NOT NULL;

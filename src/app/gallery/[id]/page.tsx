@@ -9,6 +9,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { createPaypalOrderAction } from "@/actions/payment-action"
 
 
 interface GalleryDetailPageProps {
@@ -17,7 +18,11 @@ interface GalleryDetailPageProps {
     }
 }
 
+
+
 function GalleryDetailsPage({ params }: GalleryDetailPageProps) {
+    
+
     return (
         <Suspense
             fallback={
@@ -62,7 +67,24 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
 
 
     const isAuthor = session?.user.id === userId;
-    const hasPurchasedAsset = true;
+
+    const hasPurchasedAsset = false;
+    const resolvedParamsForOrder = await  params.id
+    async function handlePurchase(){
+        'use server'
+        
+        const result = await createPaypalOrderAction(resolvedParamsForOrder)
+        if(result.alreadyPurchased){
+            redirect(`/gallery/${params.id}?success=true`);
+        }
+
+        if(result.approvalLink){
+            redirect(result.approvalLink)
+        }
+
+    }
+    
+    
 
     return <div className="min-h-screen container px-4 bg-white" >
         <div className="container py-12" >
@@ -128,7 +150,7 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
                                                </a>
                                             </Button>
                                         ) : (
-                                            <form>
+                                            <form action={handlePurchase}>
                                                 <Button type="submit" className="w-full bg-black text-white h-12">
                                                     <ShoppingCart className="w-5 h-5 mr-2" />
                                                     Purchase Now

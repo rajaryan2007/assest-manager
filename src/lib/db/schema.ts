@@ -116,6 +116,9 @@ export const purchase = pgTable('purchase',{
   userId:text("user_id").notNull().references(()=>user.id ,{onDelete:'cascade'}),
   paymentId:uuid('payment_id').notNull().references(()=> payment.id),
   price:integer('price').notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
 });
 
 export const invoice = pgTable('invoice',{
