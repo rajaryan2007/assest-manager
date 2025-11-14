@@ -15,7 +15,7 @@ async function UserAssetsPage() {
     if (session === null) return null
     const [categories, assets] = await Promise.all([getcategories(), getUserAssetsAction(session?.user?.id)])
 
-    console.log(assets,"assets");
+    
     
     
     return <div className="container py-6" >

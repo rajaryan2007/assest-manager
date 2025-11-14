@@ -56,7 +56,7 @@ async function GalleryContent({ params, searchParams }: GalleryDetailPageProps) 
 
     const result = await getAssetById(resolvedParams.id);
 
-    const success = searchParams?.success
+    const success =  searchParams?.success
 
 
 
@@ -75,18 +75,18 @@ async function GalleryContent({ params, searchParams }: GalleryDetailPageProps) 
     const isAuthor = session?.user.id === userId;
 
     const hasPurchasedAsset = session?.user?.id ?
-        await hasUserPurchasedAssetAction(params.id) : false;
+        await hasUserPurchasedAssetAction(resolvedParams.id) : false;
 
 
 
 
-    const resolvedParamsForOrder = await params.id
+    const resolvedParamsForOrder = await params
     async function handlePurchase() {
         'use server'
 
-        const result = await createPaypalOrderAction(resolvedParamsForOrder)
+        const result = await createPaypalOrderAction(resolvedParamsForOrder.id)
         if (result.alreadyPurchased) {
-            redirect(`/gallery/${params.id}?success=true`);
+            redirect(`/gallery/${resolvedParams.id}?success=true`);
         }
 
         if (result.approvalLink) {
@@ -163,7 +163,7 @@ async function GalleryContent({ params, searchParams }: GalleryDetailPageProps) 
                                             </div>
                                         ) : hasPurchasedAsset ? (
                                             <Button asChild className="w-full bg-green-600 text-white h-12">
-                                                <a download>
+                                                <a href={`/api/downlaod/${resolvedParams.id}`} download>
                                                     <Download className="mr-2 w-6 h-6 " />
                                                     Download Asset
                                                 </a>

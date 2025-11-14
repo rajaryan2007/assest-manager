@@ -138,27 +138,28 @@ export async function recordPurchase(assetId:string,paypalOrderId:string,userId:
     }
 }
 
-export async function hasUserPurchasedAssetAction(assetId:string){
-    const session = await auth.api.getSession({
-            headers:await headers()
-        })
-        
-        if(!session?.user.id){
-            return false
-        }
-        
-        try{
-          const existingPurchase = await db.select().from(purchase).where(and(eq(purchase.assetId,assetId)
-          ,eq(purchase.userId,session.user.id))).limit(1);
+export async function hasUserPurchasedAssetAction(assetId: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-          return existingPurchase;
+  if (!session?.user?.id) {
+    return false;
+  }
 
-        }catch(e){
-           console.log(e);
-           return false
-           
-        }
+  try {
+    const existingPurchase = await db
+      .select()
+      .from(purchase)
+      .where(
+        and(eq(purchase.assetId, assetId), eq(purchase.userId, session.user.id))
+      )
+      .limit(1);
 
+    return existingPurchase.length > 0;
+  } catch (e) {
+    return false;
+  }
 }
 
 export async function getAllUserPurchasedAssetsAction(){
