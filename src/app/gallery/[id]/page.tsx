@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { Badge, Divide, Download, Info, Loader2, ShoppingCart, Tag } from "lucide-react"
+import { Badge, Check, CheckCircle, Divide, Download, Info, Loader2, ShoppingCart, Tag } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 import { headers } from "next/headers"
 import { Suspense } from "react"
@@ -9,19 +9,24 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { createPaypalOrderAction } from "@/actions/payment-action"
+import { createPaypalOrderAction, hasUserPurchasedAssetAction } from "@/actions/payment-action"
 
 
 interface GalleryDetailPageProps {
     params: {
         id: string
+    };
+    searchParams: {
+        success?: string;
+        canceled?: string;
+        error?: string;
     }
 }
 
 
 
-function GalleryDetailsPage({ params }: GalleryDetailPageProps) {
-    
+function GalleryDetailsPage({ params, searchParams }: GalleryDetailPageProps) {
+
 
     return (
         <Suspense
@@ -31,14 +36,14 @@ function GalleryDetailsPage({ params }: GalleryDetailPageProps) {
                 </div>
             }
         >
-            <GalleryContent params={params} />
+            <GalleryContent params={params} searchParams={searchParams} />
         </Suspense>
     )
 }
 
 export default GalleryDetailsPage
 
-async function GalleryContent({ params }: GalleryDetailPageProps) {
+async function GalleryContent({ params, searchParams }: GalleryDetailPageProps) {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -51,6 +56,7 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
 
     const result = await getAssetById(resolvedParams.id);
 
+    const success = searchParams?.success
 
 
 
@@ -68,25 +74,38 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
 
     const isAuthor = session?.user.id === userId;
 
-    const hasPurchasedAsset = false;
-    const resolvedParamsForOrder = await  params.id
-    async function handlePurchase(){
+    const hasPurchasedAsset = session?.user?.id ?
+        await hasUserPurchasedAssetAction(params.id) : false;
+
+
+
+
+    const resolvedParamsForOrder = await params.id
+    async function handlePurchase() {
         'use server'
-        
+
         const result = await createPaypalOrderAction(resolvedParamsForOrder)
-        if(result.alreadyPurchased){
+        if (result.alreadyPurchased) {
             redirect(`/gallery/${params.id}?success=true`);
         }
 
-        if(result.approvalLink){
+        if (result.approvalLink) {
             redirect(result.approvalLink)
         }
 
     }
-    
-    
 
-    return <div className="min-h-screen container px-4 bg-white" >
+
+
+    return <div className="min-h-screen container px-4 bg-white bg-green-50 text-green-700 rounded-lg border border-green" >
+        {
+            success && (
+               <div className="flex items-center gap-3 p-4" >
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <p>purchase Successfull You can download this assets</p>
+               </div>
+            )
+        }
         <div className="container py-12" >
             <div className="grid gap-12 md:grid-cols-3" >
                 <div className="md:col-span-2 space-y-8" >
@@ -144,10 +163,10 @@ async function GalleryContent({ params }: GalleryDetailPageProps) {
                                             </div>
                                         ) : hasPurchasedAsset ? (
                                             <Button asChild className="w-full bg-green-600 text-white h-12">
-                                               <a download>
-                                                 <Download  className="mr-2 w-6 h-6 " />
-                                                 Download Asset
-                                               </a>
+                                                <a download>
+                                                    <Download className="mr-2 w-6 h-6 " />
+                                                    Download Asset
+                                                </a>
                                             </Button>
                                         ) : (
                                             <form action={handlePurchase}>

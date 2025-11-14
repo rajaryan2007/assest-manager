@@ -151,6 +151,7 @@ export async function hasUserPurchasedAssetAction(assetId:string){
           const existingPurchase = await db.select().from(purchase).where(and(eq(purchase.assetId,assetId)
           ,eq(purchase.userId,session.user.id))).limit(1);
 
+          return existingPurchase;
 
         }catch(e){
            console.log(e);
